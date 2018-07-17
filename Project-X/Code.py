@@ -25,16 +25,8 @@ def fact(x):
 
 full_frame = full_frame.apply(fact)
 full_frame.fillna(0) #TODO Not a correct approach
-# print(pd.Series(df.values.T[1], dtype="category").unique)
-# # print(df)
-# df1 = df.apply(lambda x: pd.factorize(x)[0])
-# # print(df1)
-# # cat2 = df1
-# # print(cat2)
-# cat3 = pd.read_csv('/Users/anurag/Documents/workspace/ML/Project-X/Data/test2.csv', index_col=[0]).as_matrix()
-# df2 = pd.DataFrame(cat3)
-# # print(df2.apply(lambda x: pd.factorize(x)[0]))
-
+# TARGET has same % defaulters for -6000 and abnormal no(365243) # calculated separately.
+full_frame['DAYS_EMPLOYED'].replace({365243: -6000}, inplace = True)
 # X_train, X_test, y_train, y_test = train_test_split(i_train, o_train, test_size=0.2, random_state=7)
 tmp = np.split(full_frame,[307511]) 
 i_train = tmp[0]
