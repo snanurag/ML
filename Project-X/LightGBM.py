@@ -4,6 +4,8 @@ import lightgbm as lgb
 import gc
 import pandas as pd
 import numpy as np
+from util import filterOnCorrelationLimit
+
 
 def model(features, test_features, encoding = 'ohe', n_folds = 5):
     
@@ -174,8 +176,10 @@ def model(features, test_features, encoding = 'ohe', n_folds = 5):
     
     return submission, feature_importances, metrics
 
-app_train = pd.read_csv('D:/workspace/ML/Project-X/Data/application_train.csv')
-app_test =  pd.read_csv('D:/workspace/ML/Project-X/Data/application_test.csv')
+app_train = pd.read_csv('D:/workspace/ML/Project-X/feature_matrix_ohe_train.csv')
+app_test =  pd.read_csv('D:/workspace/ML/Project-X/feature_matrix_ohe_test.csv')
+
+# app_train = filterOnCorrelationLimit(app_train, 'SK_ID_CURR', 'TARGET', 0.03, -0.03)
 
 submission, fi, metrics = model(app_train, app_test)
 print('Baseline metrics')
@@ -183,4 +187,4 @@ print(metrics)
 
 # fi_sorted = plot_feature_importances(fi)
 
-submission.to_csv('baseline_lgb.csv', index = False)
+submission.to_csv('baseline_lgb_ohe_2.csv', index = False)

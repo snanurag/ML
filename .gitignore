@@ -8,3 +8,11 @@ Project-X/Data/installments_payments.csv
 Project-X/Data/POS_CASH_balance.csv
 Project-X/Data/previous_application.csv
 Project-X/Data/sample_submission.csv
+.vscode/launch.json
+Project-X/trial.csv
+Project-X/log_reg_baseline.csv
+limited_feature.csv
+Project-X/baseline_lgb.csv
+Project-X/.vscode/
+Project-X/__pycache__/
+*.csv

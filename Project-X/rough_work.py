@@ -1,47 +1,77 @@
-import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-from keras.optimizers import SGD
-from sklearn.model_selection import train_test_split
-
-# Generate dummy data
-import numpy as np
+# pandas and numpy for data manipulation
 import pandas as pd
+import numpy as np
+import os
 
-i_train = pd.read_csv('D:/Workspace/ML/Project-X/Data/application_train.csv', index_col=[0,1])
-o_train = pd.read_csv('D:/Workspace/ML/Project-X/Data/application_train.csv', usecols=[1])
-i_test =  pd.read_csv('D:/Workspace/ML/Project-X/Data/application_test.csv', index_col=[0])
+# featuretools for automated feature engineering
+import featuretools as ft
 
-full_frame = pd.concat([i_train, i_test])
-def fact(x): 
-    if x.dtype == np.object: return pd.factorize(x)[0] 
-    else: return x
+# matplotlit and seaborn for visualizations
+import matplotlib.pyplot as plt
 
-full_frame = full_frame.apply(fact)
-full_frame.fillna(0) #TODO Not a correct approach
+plt.rcParams['font.size'] = 22
 
-# TARGET has same % defaulters for -6000 and abnormal no(365243) # calculated separately.
-full_frame['DAYS_EMPLOYED'].replace({365243: -6000}, inplace = True)
 
-tmp = np.split(full_frame,[307511]) 
-i_train = tmp[0]
-i_test = tmp[1]
+# Suppress warnings from pandas
+import warnings
+warnings.filterwarnings('ignore')
 
-model = Sequential()
-model.add(Dense(80, input_dim=120))
-model.add(Activation("sigmoid"))
-model.add(Dense(40))
-model.add(Activation("softmax"))
-model.add(Dense(1))
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.1, nesterov=True)
-model.compile(loss='mean_squared_error',
-              optimizer=sgd,
-              metrics=['accuracy'])
+from os import listdir
+from os.path import isfile, join
 
-model.summary()
 
-model.fit(i_train, o_train, epochs=100, batch_size=1000)
+def read_files(f):
+    df = pd.read_csv(f)
+    return df
 
-# o_test = model.predict(i_test)
-# # score = model.evaluate(X_test, y_test, batch_size=128)
-# print(o_test)
+mypath = os.path.dirname(os.path.abspath(__file__)) +'/Data/'
+files = listdir(mypath)
+data = {}
+
+for file in files:
+    # if file.lower().endswith('.csv'):
+    if file.lower().endswith('bureau.csv') or file.lower().endswith('application_train.csv') or file.lower().endswith('application_test.csv'):
+        data[file[:-4]] = read_files(mypath + file)
+
+data['bureau_CREDIT_ACTIVE_Active'] = data['bureau'][data['bureau']['CREDIT_ACTIVE'] == 'Active']
+data['bureau_CREDIT_ACTIVE_Closed'] = data['bureau'][data['bureau']['CREDIT_ACTIVE'] == 'Closed']
+data['bureau_CREDIT_ACTIVE_Active'] = data['bureau_CREDIT_ACTIVE_Active'].drop(['CREDIT_ACTIVE'], axis=1)
+data['bureau_CREDIT_ACTIVE_Closed'] = data['bureau_CREDIT_ACTIVE_Closed'].drop(['CREDIT_ACTIVE'], axis=1)
+
+data['bureau_CREDIT_ACTIVE_Active'] = pd.get_dummies(data['bureau_CREDIT_ACTIVE_Active'])
+data['bureau_CREDIT_ACTIVE_Closed'] = pd.get_dummies(data['bureau_CREDIT_ACTIVE_Closed'])
+
+es = ft.EntitySet(id = 'clients_train')
+es = es.entity_from_dataframe(entity_id = 'application_train', dataframe = data['application_train'], index = 'SK_ID_CURR')
+es = es.entity_from_dataframe(entity_id = 'bureau_CREDIT_ACTIVE_Active', dataframe = data['bureau_CREDIT_ACTIVE_Active'], index = 'SK_ID_BUREAU')
+es = es.entity_from_dataframe(entity_id = 'bureau_CREDIT_ACTIVE_Closed', dataframe = data['bureau_CREDIT_ACTIVE_Closed'], index = 'SK_ID_BUREAU')
+
+es = es.add_relationships([ft.Relationship(es['application_train']['SK_ID_CURR'], es['bureau_CREDIT_ACTIVE_Active']['SK_ID_CURR']), 
+                            ft.Relationship(es['application_train']['SK_ID_CURR'], es['bureau_CREDIT_ACTIVE_Closed']['SK_ID_CURR'])])
+
+feature_matrix, feature_names = ft.dfs(entityset = es, target_entity = 'application_train',
+                       agg_primitives=['max', 'sum', 'min', 'mean'], max_depth = 1, features_only=False, verbose=True)
+print(feature_names)
+feature_matrix.to_csv("feature_matrix_ohe_train.csv")
+
+
+es = ft.EntitySet(id = 'clients_test')
+es = es.entity_from_dataframe(entity_id = 'application_test', dataframe = data['application_test'], index = 'SK_ID_CURR')
+es = es.entity_from_dataframe(entity_id = 'bureau_CREDIT_ACTIVE_Active', dataframe = data['bureau_CREDIT_ACTIVE_Active'], index = 'SK_ID_BUREAU')
+es = es.entity_from_dataframe(entity_id = 'bureau_CREDIT_ACTIVE_Closed', dataframe = data['bureau_CREDIT_ACTIVE_Closed'], index = 'SK_ID_BUREAU')
+
+es = es.add_relationships([ft.Relationship(es['application_test']['SK_ID_CURR'], es['bureau_CREDIT_ACTIVE_Active']['SK_ID_CURR']), 
+                            ft.Relationship(es['application_test']['SK_ID_CURR'], es['bureau_CREDIT_ACTIVE_Closed']['SK_ID_CURR'])])
+
+feature_matrix, feature_names = ft.dfs(entityset = es, target_entity = 'application_test',
+                       agg_primitives=['max', 'sum', 'min', 'mean'], max_depth = 1, features_only=False, verbose=True)
+print(feature_names)
+feature_matrix.to_csv("feature_matrix_ohe_test.csv")
+
+
+
+print('==> %d Total Features' % len(feature_names))
+print('==> Features -> ', feature_names)
+
+# feature_matrix = feature_matrix.head(1000)
+# print('==> feature_matrix shape ', feature_matrix.shape())
