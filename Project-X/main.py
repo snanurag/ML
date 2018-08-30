@@ -29,6 +29,8 @@ for key, value in dict.items():
             data = parsing.read(value["read"])
         else:
             data = parsing.read_limited(value["read-limited"])
+    if key == "ohe":
+        
     if key == "partition" :
         for l in value:
             for k1, v1 in l.items():

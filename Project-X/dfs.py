@@ -8,14 +8,23 @@ import featuretools as ft
 
 def run_dfs(dfs_key, dfs_value):
     for l in dfs_value:
+        dfs_params = {}
         for k, v in l.items():
             if k == 'partition':
                 for partition in v:
-                    print(partition)
                     for partition_name, partition_params in partition.items():
-                        dask_run.run(partition_name, partition_params)
-                        # create_entrysets('0', partition_name, partition_params)
-
+                        dask_run.run(dfs_key, partition_name, partition_params)
+                        
+            if k == 'target':
+                dfs_params['target'] = v
+            elif k == 'frames':
+                dfs_params['frames'] = v
+            elif k == 'aggregation':
+                dfs_params['aggregation'] = v
+        if len(dfs_params) > 0:
+            dask_run.run(dfs_key, None, dfs_params)
+            
+    
 def create_entitysets(part_num, partition_name, dfs_params):
     es_dict = {}
     es = ft.EntitySet(id = partition_name)
@@ -41,12 +50,18 @@ def create_entitysets(part_num, partition_name, dfs_params):
             es_dict.update({t_k: es, 'num': part_num})
     return es_dict
 
-def run_dfs_on_ft(es_dict, partition_name, dfs_params):
+def run_dfs_on_ft(es_dict, dfs_key, partition_name, dfs_params):
     for target in dfs_params['target']:
         for t_k, t_v in target.items():
+            output_dir = os.path.dirname(os.path.abspath(__file__)) +'/dfs/'+dfs_key+'/'+es_dict['num']
+            if os.path.exists(output_dir):
+                continue
+            else:
+                os.makedirs(output_dir)
+      
             es = es_dict[t_k]
             feature_matrix, feature_names = ft.dfs(entityset = es, target_entity = t_k, agg_primitives= dfs_params['aggregation'], max_depth = 1, features_only=False, verbose=True, chunk_size=es[t_k].df.shape[0])
-            feature_matrix.to_csv(os.path.dirname(os.path.abspath(__file__)) +'/partition/'+partition_name+'/'+es_dict['num']+'/fm.csv', index=False)
+            feature_matrix.to_csv(output_dir+'/'+t_k+'.csv', index=False)
 
 def index_needed(data_set, key):
     s = data[data_set].duplicated(key)

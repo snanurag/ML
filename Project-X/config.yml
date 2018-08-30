@@ -1,40 +1,12 @@
 data :
   read :
-  #   - application_train
-  #   - application_test
-    - bureau
-    - bureau_balance
-  # read-limited :
-  # #   - application_train
-  # #   - application_test
-  #   - bureau
-  #   - bureau_balance
+    - cold_start_test
+    - consumption_train
+    - meta
+    - submission_format
 
-# partition :
-#   - one :
-#       bureau : SK_ID_BUREAU
-#       bureau_balance : SK_ID_BUREAU
-
-dfs :
-  - bureau :
-    # - data :
-    #   target : 
-    #     - application_train
-    #     - application_test
-    #   frame :
-    #     - bureau
-    #     - bureau_balance
-    - partition:
-      - one:
-          target: 
-            - bureau : SK_ID_BUREAU
-          frames : 
-            - bureau_balance : SK_ID_BUREAU
-          aggregation : 
-            - sum
-            # - mean
-            # - max
-            # - min
+ohe :
+  - meta
 
 lightgbm :
   data :

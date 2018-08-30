@@ -1,0 +1,60 @@
+data :
+  read :
+  #   - application_train
+  #   - application_test
+    - bureau
+    - bureau_balance
+  # read-limited :
+  # #   - application_train
+  # #   - application_test
+  #   - bureau
+  #   - bureau_balance
+
+# partition :
+#   - one :
+#       bureau : SK_ID_BUREAU
+#       bureau_balance : SK_ID_BUREAU
+
+dfs :
+  - dfs_bureau :
+    # - data :
+    #   target : 
+    #     - application_train
+    #     - application_test
+    #   frames :
+    #     - bureau
+    #     - bureau_balance
+    # TODO partition and one should not be array
+    - partition:
+      - one:
+          target: 
+            - bureau : SK_ID_BUREAU
+          frames : 
+            - bureau_balance : SK_ID_BUREAU
+          aggregation : 
+            - sum
+            # - mean
+            # - max
+            # - min
+
+# dfs :
+#   - app :
+#     target :
+#       - data :
+#         - application_train : SK_ID_CURR
+#         - application_test : SK_ID_CURR
+#     frames :
+#       - dfs :
+#         - dfs_bureau :
+#           - bureau : SK_ID_CURR
+#       # - partition:
+#       #   - one:
+#       #     - bureau : SK_ID_BUREAU
+#     aggregation :
+#       - sum
+
+lightgbm :
+  data :
+    - application_train
+    - application_test
+  dfs : bureau
