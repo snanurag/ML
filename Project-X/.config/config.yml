@@ -6,7 +6,45 @@ data :
     - submission_format
 
 ohe :
-  - meta
+  - data : meta
+    skip : 
+      - series_id
+
+customize-cell :
+  - data : meta
+    func : ohe_true_false
+
+customize-column-cell-1 :
+  - data : cold_start_test
+    func : generate_data_on_timestamp
+    input : timestamp
+    output : day
+
+merge:
+  left : cold_start_test
+  right : meta
+  how : left
+  on : series_id
+
+customize-row :
+  - data : cold_start_test
+    func : replace_day_with_off
+
+delete-columns :
+  - data : cold_start_test
+    columns:
+    - monday_is_day_off
+    - tuesday_is_day_off
+    - wednesday_is_day_off
+    - thursday_is_day_off
+    - friday_is_day_off
+    - saturday_is_day_off
+    - sunday_is_day_off
+
+csv :
+  data :
+    - cold_start_test
+    - meta
 
 lightgbm :
   data :
