@@ -1,53 +1,154 @@
 data :
   read :
-    - cold_start_test
-    - consumption_train
+    - cold_start_test :
+      skip : [0]
+    - consumption_train :
+      skip : [0]
     - meta
     - submission_format
+
+concat :
+  data :
+    target : cold_start_test
+    dataframes :
+      - consumption_train
+
+# fillna :
+#   - data : cold_start_test
+#     value : -1
 
 ohe :
   - data : meta
     skip : 
       - series_id
 
-customize-cell :
+customize-cells :
   - data : meta
     func : ohe_true_false
 
-customize-column-cell-1 :
+copy-data-1:
+  from : submission_format
+  to : submission
+
+# Takes array as input and return True against the values to delete and False for not to delete 
+delete-rows :
   - data : cold_start_test
-    func : generate_data_on_timestamp
-    input : timestamp
-    output : day
+    in-col : temperature
+    condition : is_temp_na
+  - data : submission
+    in-col : temperature
+    condition : is_temp_na
+  - data : submission
+    in-col : prediction_window
+    condition : daily
+  - data : submission
+    in-col : prediction_window
+    condition : weekly
+
+generate-column :
+  - data : cold_start_test
+    func : get_day_from_timestamp
+    in-col : timestamp
+    out-col : day
+  - data : cold_start_test
+    func : get_week_from_timestamp
+    in-col : timestamp
+    out-col : week
+  - data : submission
+    func : get_day_from_timestamp
+    in-col : timestamp
+    out-col : day
+  - data : submission
+    func : get_week_from_timestamp
+    in-col : timestamp
+    out-col : week
 
 merge:
-  left : cold_start_test
-  right : meta
-  how : left
-  on : series_id
+  - left : cold_start_test
+    right : meta
+    how : left
+    on : series_id
+  - left : submission
+    right : meta
+    how : left
+    on : series_id
 
+# Takes series as input
 customize-row :
   - data : cold_start_test
+    func : replace_day_with_off
+  - data : submission
     func : replace_day_with_off
 
 delete-columns :
   - data : cold_start_test
     columns:
-    - monday_is_day_off
-    - tuesday_is_day_off
-    - wednesday_is_day_off
-    - thursday_is_day_off
-    - friday_is_day_off
-    - saturday_is_day_off
-    - sunday_is_day_off
+      - monday_is_day_off
+      - tuesday_is_day_off
+      - wednesday_is_day_off
+      - thursday_is_day_off
+      - friday_is_day_off
+      - saturday_is_day_off
+      - sunday_is_day_off
+  - data : submission
+    columns:
+      - monday_is_day_off
+      - tuesday_is_day_off
+      - wednesday_is_day_off
+      - thursday_is_day_off
+      - friday_is_day_off
+      - saturday_is_day_off
+      - sunday_is_day_off
+      - prediction_window
 
-csv :
+csv-1 :
   data :
     - cold_start_test
     - meta
 
-lightgbm :
+keras:
+  train :
+    data : cold_start_test
+    skip : [series_id, timestamp]
+    output : consumption
+    activation : tanh
+    model : sequential
+    initializer : normal
+    loss : mean_squared_error
+    optimizer : sgd
+    metrics : [accuracy]
+    validate : false
+  predict :
+    data : submission
+
+transfer:
+  from :
+    data : submission
+    key : [series_id, timestamp]
+    col : consumption
+  to :
+    data : submission_format
+    key : [series_id, timestamp]
+    col : consumption
+
+csv-2 :
   data :
-    - application_train
-    - application_test
-  dfs : bureau
+    - submission
+    - submission_format
+
+# copy-data-2:
+#   from : cold_start_test
+#   to : cold_start_test_daily
+
+# customize-column :
+#   - data : cold_start_test_daily
+#     func : get_date_from_timestamp
+#     in-col : timestamp
+ 
+# group-by :
+#   - data : cold_start_test
+#     group-on :
+#       - timestamp
+#     aggregation:
+#       - consumption : sum
+#       - temperature : mean

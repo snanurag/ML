@@ -1,11 +1,15 @@
 import datetime
+import numpy as np
+import pandas as pd
 
+def get_day_from_timestamp(x):
+    return pd.to_datetime(x, format="%Y-%m-%d %H:%M:%S").dayofweek
 
-def generate_data_on_timestamp(x):
-    d =  datetime.datetime.strptime(x, "%Y-%m-%d %H:%M:%S").date()
-    return d.weekday()
-    # print("generate_data_on_timestamp")
-    # return "generate_data_on_timestamp"
+def get_week_from_timestamp(x):
+    return pd.to_datetime(x, format="%Y-%m-%d %H:%M:%S").week
+
+def get_date_from_timestamp(x):
+    return datetime.datetime.strptime(x, "%Y-%m-%d %H:%M:%S").date()
 
 def ohe_true_false(x):
     if type(x) == bool:
@@ -31,3 +35,13 @@ def replace_day_with_off(row):
     else:
         row['day'] = 0
     return row
+
+# Takes array as input
+def is_temp_na(x):   
+    return np.isnan(x)
+
+def daily(x):
+    return x == 'daily'
+
+def weekly(x):
+    return x == 'weekly'

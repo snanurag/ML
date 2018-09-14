@@ -7,10 +7,11 @@ def customize_column(arr):
     for a in arr:
         method_to_call = getattr(custom, a.get('func'))
         args = get_args(a.get('args'))
-        if 'output' in a.keys():
-            data[a.get('data')][a.get('output')] = data[a.get('data')][a.get('input')].apply(method_to_call, args=(args))
+        key = 'data'
+        if 'out-col' in a:
+            data[a.get(key)][a.get('out-col')] = data[a.get(key)][a.get('in-col')].apply(method_to_call, args=(args))
         else:
-            data[a.get('data')][a.get('input')] = data[a.get('data')][a.get('input')].apply(method_to_call, args=(args))
+            data[a.get(key)][a.get('in-col')] = data[a.get(key)][a.get('in-col')].apply(method_to_call, args=(args))
 
 def customize(arr):
     for a in arr:
