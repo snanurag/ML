@@ -12,6 +12,7 @@ def apply_del_row(row):
 def concat(v):
     for a in v.get('data').get('dataframes'):
         data[v.get('data').get('target')] = pd.concat([data[v.get('data').get('target')], data[a]], ignore_index=True)
+        print('Data %s is concated to data %s' % (a, v.get('data').get('target')))
 
 def delete(value):
     for a in value:
@@ -24,10 +25,16 @@ def delete_row(val):
     for a in val:
         conditional_method = getattr(custom, a.get('condition'))
         data[a.get('data')] = data[a.get('data')][conditional_method(data[a.get('data')][a.get('in-col')]) == False]
+        print('Row with condition %s on column %s is deleted' %(a.get('condition'), a.get('in-col')))
 
 def fillna(v):
     for a in v:
         data[a.get('data')] = data[a.get('data')].fillna(a.get('value'))
+
+def group_by(v):
+    for a in v:
+        df = data[a.get('data')]
+        data[a.get('data')] = df.groupby(a.get('group-on'), as_index=False).mean()
 
 def merge(value):
     for v in value:

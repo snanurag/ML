@@ -40,6 +40,7 @@ def train(v):
         train_in_col = df.columns.values
         train_out_col = dict.get('output')  
         print('Training columns -> ',train_in_col)
+        print('Output column -> ', train_out_col)
         dim = df.shape[1]
         model.add(Dense(dim *2 -1, input_dim=dim, kernel_initializer=dict.get('initializer'), activation=dict.get('activation')))
         model.add(Dense(dim -1, kernel_initializer=dict.get('initializer'), activation=dict.get('activation')))
@@ -48,11 +49,11 @@ def train(v):
         model.compile(loss=dict.get('loss'), optimizer=dict.get('optimizer'), metrics=dict.get('metrics'))
         model.summary()
 
-        model.fit(df, o, epochs=50, batch_size=100)
+        model.fit(df, o, epochs=dict.get('epochs'), batch_size=5)
         print('model is trained now.')
         if(('validate' in dict) == True and dict.get('validate') == True):
-            loss, acc = model.evaluate(df_test, o_test, batch_size=100)
-            print('model is validated with loss %f and accuracy %f',loss, acc)
+            loss, acc = model.evaluate(df_test, o_test, batch_size=5)
+            print('model is validated with loss %f and accuracy %f' % (loss, acc))
 
     if 'predict' in v:
         dict = v.get('predict')

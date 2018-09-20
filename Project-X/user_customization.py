@@ -10,9 +10,12 @@ def customize_column(arr):
         key = 'data'
         if 'out-col' in a:
             data[a.get(key)][a.get('out-col')] = data[a.get(key)][a.get('in-col')].apply(method_to_call, args=(args))
+            print('New column %s is generated for %s' % (a.get('out-col'), a.get(key)))
         else:
             data[a.get(key)][a.get('in-col')] = data[a.get(key)][a.get('in-col')].apply(method_to_call, args=(args))
+            print('Column %s is customized for %s' % (a.get('in-col'), a.get(key)))
 
+        
 def customize(arr):
     for a in arr:
         df = parsing.data[a.get('data')]

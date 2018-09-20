@@ -31,6 +31,55 @@ keras:
   predict :
     data : submission
 ```
+
+# LGBMClassifier
+```
+lightgbm :
+  train :
+    data : cold_start_test
+    skip : [series_id, timestamp]
+    output : consumption
+    type : LGBMClassifier
+    learning-rate : 0.05
+    reg-alpha : 0.1
+    reg-lambda : 0.1
+    subsample : 0.8
+    n-estimators : 1000
+    random-state : 50
+  predict :
+    data : submission
+```
+
+# LGBMRegressor
+```
+lightgbm :
+  train :
+    data : cold_start_test
+    skip : [series_id, timestamp]
+    output : consumption
+    type : LGBMRegressor
+  predict :
+    data : submission
+```
+
+# fillna
+```fillna :
+  - data : cold_start_test
+    value : -1
+```
+
+# Delete row on condition
+```
+# Takes array as input and return True against the values to delete and False for not to delete 
+delete-rows :
+  - data : cold_start_test
+    in-col : temperature
+    condition : is_temp_na
+  - data : submission
+    in-col : prediction_window
+    condition : daily
+```
+
 # Full Sample yaml
 
 ```

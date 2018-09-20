@@ -1,11 +1,13 @@
 import pandas as pd
 from os import path
+from os import listdir
 import warnings
 import os
 import numpy as np
 warnings.filterwarnings('ignore')
 
 data_path = path.dirname(path.abspath(__file__)) +'/Data/'
+cache_path = path.dirname(path.abspath(__file__)) +'/cache/'
 data = {}
 out_data = {}
 
@@ -19,6 +21,7 @@ def read(list):
         elif isinstance(l, str) == True:
             data[l] = pd.read_csv(data_path + l+".csv")
             data[l] = convert_types(data[l])
+    print('Read all data.')
     return data
 
 def read_limited(list):
@@ -33,15 +36,28 @@ def read_limited(list):
             data[l] = convert_types(data[l])
     return data
 
-def to_csv(value):
+def read_from_cache():
+    files = listdir(cache_path)
+    for k in files:
+        data[k] = pd.read_csv(cache_path + k)
+    print('Read from cache.')
+
+def cache_data():
+    if path.exists(cache_path) is False:
+        os.makedirs(cache_path)
+    for k in data:
+        data[k].to_csv(cache_path+k, index=False)
+    print('cache is generated.')
+
+def to_csv(dict):
     output = path.dirname(path.abspath(__file__)) +'/output/'
     if path.exists(output) is False:
         os.makedirs(output)
-    for k, v in value.items():
-        if k == "data":
-            for o in v:
-                data[o].to_csv(output+o+".csv", index=False)
-                print("csv is generated for %s" % o)
+    v = dict.get('data')
+    ind = dict.get('index')
+    for o in v:
+        data[o].to_csv(output+o+".csv", index=ind)
+        print("csv is generated for %s" % o)
 
 def copy(v):
     data[v.get('to')] = data[v.get('from')].copy()
