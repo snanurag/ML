@@ -18,12 +18,14 @@ import decision_tree
 import util
 from dtree import xgboost_impl
 from manipulate import alterations
+import ptvsd
 warnings.filterwarnings('ignore')
 
-sys.path.append(os.getcwd())
 
 def main():
-    custom = __import__("custom.custom")
+    if sys.argv[1] == "--debug":
+        debug()
+
     configfile = ""
     caching = False
     if path.exists(os.getcwd()+"/.config/config.yml"):
@@ -123,11 +125,22 @@ def main():
         
 # shutil.rmtree("partition")
 
-def caching_operation():
-    if path.exists(parsing.cache_path):
-        parsing.read_from_cache()
-    else:
-        parsing.cache_data()
+# def caching_operation():
+#     if path.exists(parsing.cache_path):
+#         parsing.read_from_cache()
+#     else:
+#         parsing.cache_data()
+
+def debug():
+    host = "0.0.0.0"
+    port = "5678"
+    if len(sys.argv) > 2:
+        host = sys.argv[2]
+    if len(sys.argv) > 3:
+        port = sys.argv[3]    
+    ptvsd.enable_attach(address=(host,port))
+    ptvsd.wait_for_attach()
+
 
 if __name__ == '__main__':
     main()
