@@ -10,6 +10,9 @@ import user_customization
 import re
 import regression
 import decision_tree
+import util
+from dtree import xgboost_impl
+from manipulate import alterations
 warnings.filterwarnings('ignore')
 
 def main():
@@ -30,14 +33,19 @@ def main():
             print(exc)
 
     for k in dict:
-        if k == 'cache' and dict.get(k) == True:
-            caching = True
-            break
+        if k == 'cache':
+            if dict.get(k) == True:
+                caching = True
+                break
+            if dict.get(k) == False:
+                if path.exists(path.dirname(path.abspath(__file__))+"/cache"):
+                    shutil.rmtree("cache")
 
     for key, value in dict.items():
         if caching == True:
             if path.exists(parsing.cache_path) == False and key == 'cache':
                 parsing.cache_data()
+                caching = False
             elif path.exists(parsing.cache_path):
                 if key != 'cache':
                     continue
@@ -64,9 +72,19 @@ def main():
             user_customization.customize_row(value)
         if re.search("delete-columns", key, re.IGNORECASE):
             manipulation.delete(value)
+        if re.search("delete-df", key, re.IGNORECASE):
+            parsing.delete_df(value)
         if re.search("delete-rows", key, re.IGNORECASE):
             manipulation.delete_row(value)
-        if re.search("fillna", key, re.IGNORECASE):
+        if key.lower().startswith(("de-normalize")):
+            alterations.denormalize(value)
+        if re.search("display", key, re.IGNORECASE):
+            util.display(value)
+        if re.search("fillna-by-search", key, re.IGNORECASE):
+            manipulation.fillna_by_search(value)
+        elif re.search("fillna-by-mean", key, re.IGNORECASE):
+            manipulation.fillna_by_mean(value)
+        elif re.search("fillna", key, re.IGNORECASE):
             manipulation.fillna(value)
         if re.search("generate-column", key, re.IGNORECASE):
             user_customization.customize_column(value)
@@ -76,6 +94,8 @@ def main():
             decision_tree.train(value)
         if re.search("merge", key, re.IGNORECASE):
             manipulation.merge(value)
+        if key.lower().startswith(("normalize")):
+            alterations.normalize(value)
         if re.search("ohe", key, re.IGNORECASE):
             manipulation.ohe(value)
         if re.search("partition", key, re.IGNORECASE):                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
@@ -90,6 +110,8 @@ def main():
             regression.train(value)
         if re.search("transfer", key, re.IGNORECASE):
             manipulation.transfer(value)
+        if re.search('xgboost', key, re.IGNORECASE):
+            xgboost_impl.train(value)
         
 # shutil.rmtree("partition")
 

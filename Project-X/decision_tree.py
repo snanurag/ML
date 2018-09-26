@@ -6,8 +6,9 @@ import gc
 import pandas as pd
 import numpy as np
 from util import filterOnCorrelationLimit
+from sklearn.metrics import mean_squared_error as mse
 from parsing import data
-
+import xgboost as xgb
 
 def train(v):
     train_in_col = []
@@ -119,5 +120,7 @@ def train(v):
         lgb_eval = lgb.Dataset(valid_in, valid_o, reference=lgb_train)
         model = lgb.train(params, lgb_train, num_boost_round=20,
             valid_sets=lgb_eval)
-        
+    
+        print('full train\t',mse(model.predict(valid_in, num_iteration=model.best_iteration), valid_o)) # benchmark
+
         data[dict2.get('data')][train_out_col] = model.predict(test, num_iteration=model.best_iteration)

@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
-# print(pd.to_datetime('2018-09-16 15:00:00', format="%Y-%m-%d %H:%M:%S").hour)
+print(pd.to_datetime('2018-09-24 15:00:00', format="%Y-%m-%d %H:%M:%S").dayofweek)
 def get_day_from_timestamp(x):
     return pd.to_datetime(x, format="%Y-%m-%d %H:%M:%S").dayofweek
 
@@ -44,6 +44,15 @@ def replace_day_with_off(row):
 def is_temp_na(x):   
     return np.isnan(x)
 
+def is_temp_not_na(x):   
+    return np.isnan(x) == False
+
+def day_time(x):
+    return x < 13 or x > 15
+
+def custom_temp_range(x):
+    return x < 14 or x >21
+
 def daily(x):
     return x == 'daily'
 
@@ -55,3 +64,9 @@ def hourly(x):
 
 def is_one(x):
     return x == 1
+
+def is_zero(x):
+    return x == 0
+
+def square(x):
+    return x*x

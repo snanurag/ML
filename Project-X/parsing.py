@@ -49,6 +49,10 @@ def cache_data():
         data[k].to_csv(cache_path+k, index=False)
     print('cache is generated.')
 
+def delete_df(v):
+    for x in v.get('data'):
+        del data[x]
+
 def to_csv(dict):
     output = path.dirname(path.abspath(__file__)) +'/output/'
     if path.exists(output) is False:

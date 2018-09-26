@@ -61,6 +61,22 @@ lightgbm :
   predict :
     data : submission
 ```
+# Regression - xgboost (pretrain and train)
+```
+xgboost :
+  pre-train:
+    data : cold_start_test_temp_na
+    skip : [series_id]
+    output : consumption
+    type : regression
+  train :
+    data : cold_start_test
+    skip : [series_id]
+    output : consumption
+    type : regression
+  predict :
+    data : submission
+```
 
 # fillna
 ```fillna :

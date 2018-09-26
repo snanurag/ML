@@ -24,12 +24,81 @@ def delete(value):
 def delete_row(val):
     for a in val:
         conditional_method = getattr(custom, a.get('condition'))
-        data[a.get('data')] = data[a.get('data')][conditional_method(data[a.get('data')][a.get('in-col')]) == False]
+        col_arr = data[a.get('data')][a.get('in-col')]
+        np_a = np.ndarray(col_arr.size, dtype=bool)
+        count =0
+        for i in col_arr:
+            np_a[count] = conditional_method(i)
+            count +=1
+        data[a.get('data')] = data[a.get('data')][np_a == False]
         print('Row with condition %s on column %s is deleted' %(a.get('condition'), a.get('in-col')))
 
 def fillna(v):
     for a in v:
         data[a.get('data')] = data[a.get('data')].fillna(a.get('value'))
+
+def fillna_by_mean(v):
+    for a in v:
+        df = data[a.get('data')]
+        df.set_index(a.get('over'), inplace=True)
+        for i, row in df.iterrows():
+            df.loc[i] = df.loc[i].fillna(df.loc[i].mean())
+            print('mean filled for %s' % i)
+        data[a.get('data')] = df.reset_index(level=a.get('match'))
+
+def fillna_by_mean2(v):
+    for a in v:
+        df_cp = data[a.get('data')].copy()
+        df_cp = df_cp.groupby(a.get('over'), as_index=False).mean()
+        df_cp = df_cp.sort([a.get('over')])
+        
+
+
+# TODO it is failing because index is not unique.
+def fillna_by_search(v):
+    for a in v:
+        df = data[a.get('data')]
+        for search_k in a.get('search-in'):
+            tmp_df = data[search_k].copy()
+            df.set_index(a.get('match'), inplace=True)
+            tmp_df.set_index(a.get('match'), inplace=True)
+            tmp_itr = tmp_df.iterrows()
+            val = next(tmp_itr)
+            for i, row in df.iterrows():
+                if np.isnan(row[a.get('col')]):
+                    while val != None and val[0] <= i:
+                        if val[0] == i and np.isnan(val[1][a.get('col')]) == False:
+                            df.loc[i][a.get('col')] = val[1][a.get('col')]
+                            # row[a.get('col')] = val[1][a.get('col')]
+                            # df[i] = row
+                            print('row %s is replaced ' % row)
+                            try:
+                                val = next(tmp_itr)
+                            except StopIteration:
+                                val = None
+                            break
+                        else:
+                            try:
+                                val = next(tmp_itr)
+                            except StopIteration:
+                                val = None
+            df = df.reset_index(level=a.get('match'))
+        data[a.get('data')] = df
+
+
+# def fillna_by_search2(v):
+#     for a in v:
+#         df = data[a.get('data')]
+#         df.set_index(a.get('match'), inplace=True)
+#         for search_k in a.get('search-in'):
+#             tmp_df = data[search_k].copy()
+#             tmp_df.set_index(a.get('match'), inplace=True)
+#             for index, row in df.iterrows():
+#                 if np.isnan(row[a.get('col')]):
+#                     val = tmp_df.loc[row[a.get('match')]][a.get('col')].mean()
+#                     row[a.get('col')] = val
+#                     df[index] = row 
+#         df.reset_index(level=a.get('match'))                   
 
 def group_by(v):
     for a in v:
