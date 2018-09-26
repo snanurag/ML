@@ -1,5 +1,10 @@
+#!/usr/bin/env python3.6
+
+
 import yaml
 from os import path
+import os
+import sys
 import warnings
 import parsing
 import split_merge
@@ -15,13 +20,16 @@ from dtree import xgboost_impl
 from manipulate import alterations
 warnings.filterwarnings('ignore')
 
+sys.path.append(os.getcwd())
+
 def main():
+    custom = __import__("custom.custom")
     configfile = ""
     caching = False
-    if path.exists(path.dirname(path.abspath(__file__))+"/.config/config.yml"):
-        configfile = path.dirname(path.abspath(__file__))+"/.config/config.yml"
-    elif path.exists(path.dirname(path.abspath(__file__))+"/.config/config.yaml"):
-        configfile = path.dirname(path.abspath(__file__))+"/.config/config.yaml"
+    if path.exists(os.getcwd()+"/.config/config.yml"):
+        configfile = os.getcwd()+"/.config/config.yml"
+    elif path.exists(os.getcwd()+"/.config/config.yaml"):
+        configfile = os.getcwd()+"/.config/config.yaml"
     else :
         print("No config.yml file")    
 
@@ -38,8 +46,8 @@ def main():
                 caching = True
                 break
             if dict.get(k) == False:
-                if path.exists(path.dirname(path.abspath(__file__))+"/cache"):
-                    shutil.rmtree("cache")
+                if path.exists(parsing.cache_path):
+                    shutil.rmtree(parsing.cache_path)
 
     for key, value in dict.items():
         if caching == True:
@@ -121,4 +129,5 @@ def caching_operation():
     else:
         parsing.cache_data()
 
-main()
+if __name__ == '__main__':
+    main()

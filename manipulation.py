@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 from parsing import data
-from custom import custom
+import sys,os
+
+sys.path.append(os.getcwd())
 
 def apply_del_row(row):
     if np.isnan(row['temperature']) == True:
@@ -23,7 +25,7 @@ def delete(value):
 
 def delete_row(val):
     for a in val:
-        conditional_method = getattr(custom, a.get('condition'))
+        conditional_method = getattr(__import__('custom.custom', globals(), locals(), [a.get('condition')]), a.get('condition'))
         col_arr = data[a.get('data')][a.get('in-col')]
         np_a = np.ndarray(col_arr.size, dtype=bool)
         count =0

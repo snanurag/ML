@@ -6,8 +6,8 @@ import os
 import numpy as np
 warnings.filterwarnings('ignore')
 
-data_path = path.dirname(path.abspath(__file__)) +'/Data/'
-cache_path = path.dirname(path.abspath(__file__)) +'/cache/'
+data_path = os.getcwd() +'/Data/'
+cache_path = os.getcwd() +'/.cache/'
 data = {}
 out_data = {}
 
@@ -54,7 +54,7 @@ def delete_df(v):
         del data[x]
 
 def to_csv(dict):
-    output = path.dirname(path.abspath(__file__)) +'/output/'
+    output = os.getcwd() +'/output/'
     if path.exists(output) is False:
         os.makedirs(output)
     v = dict.get('data')
