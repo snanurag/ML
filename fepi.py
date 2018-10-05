@@ -19,11 +19,13 @@ import util
 from dtree import xgboost_impl
 from manipulate import alterations
 import ptvsd
+from visuals import mat_plot_lib
 warnings.filterwarnings('ignore')
 
 
 def main():
-    if sys.argv[1] == "--debug":
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--debug":
         debug()
 
     configfile = ""
@@ -57,11 +59,14 @@ def main():
                 parsing.cache_data()
                 caching = False
             elif path.exists(parsing.cache_path):
-                if key != 'cache':
-                    continue
-                else:
+                if key == 'cache':
                     caching = False
                     parsing.read_from_cache()
+                continue
+                    
+        
+        # if key.startswith('cache'):
+        #     parsing.cache_data()
 
         if key == "data" :
             if 'read' in value.keys():
@@ -112,6 +117,8 @@ def main():
             for l in value:
                 for k1, v1 in l.items():
                     split_merge.input_partition(v1, k1)
+        if key.lower().startswith(("matplot")):
+            mat_plot_lib.plot(value)
         if re.search("dfs", key, re.IGNORECASE):
             for l in value :
                 for k, v in l.items():

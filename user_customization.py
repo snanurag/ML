@@ -25,7 +25,7 @@ def customize(arr):
         df = parsing.data[a.get('data')]
         args = get_args(a.get('args'))
         for c in df:
-            method_to_call = getattr(custom, a.get('func'))
+            method_to_call = getattr(__import__('custom.custom', globals(), locals(), [a.get('func')]), a.get('func'))
             df[c] = df[c].apply(method_to_call, args=(args))
 
 def customize_row(arr):
@@ -33,6 +33,7 @@ def customize_row(arr):
         args = get_args(a.get('args'))
         method_to_call = getattr(__import__('custom.custom', globals(), locals(), [a.get('func')]), a.get('func'))
         data[a.get('data')] = data[a.get('data')].apply(method_to_call, axis=1, args=(args)) 
+        print('Row customization %s for data %s is done' % (a.get('func'), a.get('data')))
 
 def get_args(arr):
     args =[]

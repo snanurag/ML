@@ -124,3 +124,5 @@ def train(v):
         print('full train\t',mse(model.predict(valid_in, num_iteration=model.best_iteration), valid_o)) # benchmark
 
         data[dict2.get('data')][train_out_col] = model.predict(test, num_iteration=model.best_iteration)
+
+        print ('Lightgbm regression is done for %s \n' % dict.get('data'))

@@ -41,21 +41,22 @@ def fillna(v):
 
 def fillna_by_mean(v):
     for a in v:
-        df = data[a.get('data')]
-        df.set_index(a.get('over'), inplace=True)
-        for i, row in df.iterrows():
-            df.loc[i] = df.loc[i].fillna(df.loc[i].mean())
-            print('mean filled for %s' % i)
-        data[a.get('data')] = df.reset_index(level=a.get('match'))
-
-def fillna_by_mean2(v):
-    for a in v:
-        df_cp = data[a.get('data')].copy()
-        df_cp = df_cp.groupby(a.get('over'), as_index=False).mean()
-        df_cp = df_cp.sort([a.get('over')])
-        
-
-
+        if 'search-in' in a:
+            df = data[a.get('search-in')]
+            df_grouped = df.groupby(a.get('group-on'))
+            df = data[a.get('data')]
+            for i, row in df.iterrows():
+                for c in a.get('target'):
+                    if np.isnan(row[c]):
+                        # TODO Fix this 0 index
+                        key = row[a.get('group-on')[0]]
+                        if key in df_grouped.groups:
+                            df.set_value(i, c, df_grouped.get_group(key)[c].mean()) 
+        else:    
+            df = data[a.get('data')]
+            df[a.get('target')] = df.groupby(a.get('group-on'))[a.get('target')].transform(lambda x: x.fillna(x.mean()))
+            data[a.get('data')] = df
+    
 # TODO it is failing because index is not unique.
 def fillna_by_search(v):
     for a in v:
@@ -105,8 +106,11 @@ def fillna_by_search(v):
 def group_by(v):
     for a in v:
         df = data[a.get('data')]
-        data[a.get('data')] = df.groupby(a.get('group-on'), as_index=False).mean()
-
+        if 'aggregation' in a:
+            data[a.get('data')] = df.groupby(a.get('group-on'), as_index=a.get('as-index')).agg(a.get('aggregation'))
+        else:
+            data[a.get('data')] = df.groupby(a.get('group-on'), as_index=a.get('as-index')).mean()
+       
 def merge(value):
     for v in value:
         data[v.get('left')] = pd.merge(data[v.get('left')], data[v.get('right')], how=v.get('how'), on=v.get('on'))

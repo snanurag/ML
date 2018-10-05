@@ -63,8 +63,9 @@ def to_csv(dict):
         data[o].to_csv(output+o+".csv", index=ind)
         print("csv is generated for %s" % o)
 
-def copy(v):
-    data[v.get('to')] = data[v.get('from')].copy()
+def copy(val):
+    for v in val:
+        data[v.get('to')] = data[v.get('from')].copy()
 
             
 def convert_types(df):
