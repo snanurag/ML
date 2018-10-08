@@ -30,10 +30,10 @@ def main():
 
     configfile = ""
     caching = False
-    if path.exists(os.getcwd()+"/.config/config.yml"):
-        configfile = os.getcwd()+"/.config/config.yml"
-    elif path.exists(os.getcwd()+"/.config/config.yaml"):
-        configfile = os.getcwd()+"/.config/config.yaml"
+    if path.exists(os.getcwd()+"/config/config.yml"):
+        configfile = os.getcwd()+"/config/config.yml"
+    elif path.exists(os.getcwd()+"/config/config.yaml"):
+        configfile = os.getcwd()+"/config/config.yaml"
     else :
         print("No config.yml file")    
 
@@ -65,8 +65,8 @@ def main():
                 continue
                     
         
-        # if key.startswith('cache'):
-        #     parsing.cache_data()
+        if key.startswith('cache'):
+            parsing.cache_data()
 
         if key == "data" :
             if 'read' in value.keys():

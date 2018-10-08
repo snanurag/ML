@@ -118,7 +118,7 @@ def train(v):
             
         lgb_train = lgb.Dataset(train_in, train_o)
         lgb_eval = lgb.Dataset(valid_in, valid_o, reference=lgb_train)
-        model = lgb.train(params, lgb_train, num_boost_round=20,
+        model = lgb.train(params, lgb_train, num_boost_round=90,
             valid_sets=lgb_eval)
     
         print('full train\t',mse(model.predict(valid_in, num_iteration=model.best_iteration), valid_o)) # benchmark

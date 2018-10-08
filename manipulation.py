@@ -46,12 +46,13 @@ def fillna_by_mean(v):
             df_grouped = df.groupby(a.get('group-on'))
             df = data[a.get('data')]
             for i, row in df.iterrows():
-                for c in a.get('target'):
-                    if np.isnan(row[c]):
-                        # TODO Fix this 0 index
-                        key = row[a.get('group-on')[0]]
+                for t in a.get('target'):
+                    if np.isnan(row[t]):
+                        key = ()
+                        for k in a.get('group-on'):
+                            key = key + (row[k],)
                         if key in df_grouped.groups:
-                            df.set_value(i, c, df_grouped.get_group(key)[c].mean()) 
+                            df.set_value(i, t, df_grouped.get_group(key)[t].mean()) 
         else:    
             df = data[a.get('data')]
             df[a.get('target')] = df.groupby(a.get('group-on'))[a.get('target')].transform(lambda x: x.fillna(x.mean()))
@@ -106,14 +107,33 @@ def fillna_by_search(v):
 def group_by(v):
     for a in v:
         df = data[a.get('data')]
+        agg_map = {}
         if 'aggregation' in a:
             data[a.get('data')] = df.groupby(a.get('group-on'), as_index=a.get('as-index')).agg(a.get('aggregation'))
+        elif 'custom-aggregation' in a:
+            m = a.get('custom-aggregation')
+            for m_k, m_v in m.items():
+                f_a = []
+                for f in m_v:
+                    f_a.append(getattr(__import__('custom.custom', globals(), locals(), [f]), f))
+                agg_map[m_k] = f_a
+            df = df.groupby(a.get('group-on'), as_index=a.get('as-index')).agg(agg_map)
+            # TODO use "_" instead of "". Need to take care of "" values in ravel array
+            df.columns = ["".join(x) for x in df.columns.ravel()]
+            print(df.head())
+            data[a.get('data')] = df
         else:
             data[a.get('data')] = df.groupby(a.get('group-on'), as_index=a.get('as-index')).mean()
        
 def merge(value):
     for v in value:
-        data[v.get('left')] = pd.merge(data[v.get('left')], data[v.get('right')], how=v.get('how'), on=v.get('on'))
+        if 'right-col' in v:
+            right_col = v.get('right-col')
+            for m in v.get('merge-on'):
+                right_col.append(m)
+            data[v.get('left')] = pd.merge(data[v.get('left')], data[v.get('right')][right_col], how=v.get('how'), on=v.get('merge-on'))
+        else:    
+            data[v.get('left')] = pd.merge(data[v.get('left')], data[v.get('right')], how=v.get('how'), on=v.get('merge-on'))
 
 def ohe(arr):
     df = pd.DataFrame()
