@@ -1,4 +1,8 @@
 from parsing import data
+from sklearn.preprocessing import MinMaxScaler
+# progress bar
+from tqdm import tqdm
+
 
 def normalize(v):
     df = data[v.get('data')]
@@ -69,3 +73,13 @@ def denorm(v, norm_data=None):
                 cont_while = False
     data[v.get('data')] = df
     
+def normalize_scaled(value):
+    for v in value:
+        df = data[v.get('data')]
+        scaler = MinMaxScaler(feature_range=(v.get('scale')[0], v.get('scale')[1]))
+        df_grps = df.groupby(v.get('within-group'))
+        for id, d in tqdm(df_grps, total=df_grps.ngroups, desc="Normalized Scale progress"):
+            d = scaler.fit_transform(d[v.get('target')].values.reshape(-1, 1))
+            for i, row in df.iterrows():
+                df.set_value(i, v.get('target'), row[v.get('target')])
+

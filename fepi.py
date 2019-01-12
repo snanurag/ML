@@ -20,6 +20,8 @@ from dtree import xgboost_impl
 from manipulate import alterations
 import ptvsd
 from visuals import mat_plot_lib
+from nn.keras import lstm
+
 warnings.filterwarnings('ignore')
 
 
@@ -107,9 +109,13 @@ def main():
             manipulation.group_by(value)
         if re.search("lightgbm", key, re.IGNORECASE):
             decision_tree.train(value)
+        if key.lower().startswith("lstm"):
+            lstm.train(value)
         if re.search("merge", key, re.IGNORECASE):
             manipulation.merge(value)
-        if key.lower().startswith(("normalize")):
+        if key.lower().startswith(("normalize-scaled")):
+            alterations.normalize_scaled(value)
+        elif key.lower().startswith(("normalize")):
             alterations.normalize(value)
         if re.search("ohe", key, re.IGNORECASE):
             manipulation.ohe(value)
@@ -125,6 +131,8 @@ def main():
                     dfs.run_dfs(k, v)
         if re.search("keras", key, re.IGNORECASE):
             regression.train(value)
+        if key.lower().startswith("script"):
+            manipulation.script_run(value)
         if re.search("transfer", key, re.IGNORECASE):
             manipulation.transfer(value)
         if re.search('xgboost', key, re.IGNORECASE):

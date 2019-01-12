@@ -160,3 +160,13 @@ def transfer(value):
         if np.isnan(row[from_col+'_from']) == False:
             data[dict.get('data')].loc[index, from_col] = row[from_col+'_from']
     data[dict.get('data')] = data[dict.get('data')].drop([from_col+'_from'], axis=1)
+
+def script_run(v):
+    m = getattr(__import__('custom.custom', globals(), locals(), [v.get('name')]), v.get('name'))
+    a = v.get('data')
+    d_arr = []
+    for s in a:
+        d_arr.append(data[s])
+    m(d_arr)
+    for i, val in enumerate(a):
+        data[a[i]] = d_arr[i]
